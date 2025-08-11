@@ -112,7 +112,7 @@ def arc_summary(kstats):
         return
 
     # variables we refer to often and must exist
-    for i in ['size', 'c', 'c_max', 'c_min', 'p', 'hits', 'misses']:
+    for i in ['size', 'c', 'c_max', 'c_min', 'hits', 'misses', 'meta', 'pd', 'pm']:
         if i not in kstats:
             pr_error('arcstats value \"{}\" not found'.format(i))
             return
@@ -170,11 +170,20 @@ def arc_summary(kstats):
     pr_desc(2, 'Min target size limit (GiB) =',
             s_float(kstats['c_min'], scale=BYTES_PER_GIB, fmt="%.3f"))
 
-    pr_desc(1, 'MRU target size (GiB) =',
-            s_float(kstats['p'], scale=BYTES_PER_GIB),
-            s_pct(kstats['p'], scale=kstats['c'], of='target size'))
+    pr_desc(1, 'meta MRU? size (GiB) =',
+            s_float(kstats['meta'], scale=BYTES_PER_GIB),
+            s_pct(kstats['meta'], scale=kstats['c'], of='target size'))
 
-    mfu_target_size = float(kstats['c']) - float(kstats['p'])
+    pr_desc(1, 'data MRU size (GiB) =',
+            s_float(kstats['pd'], scale=BYTES_PER_GIB),
+            s_pct(kstats['pd'], scale=kstats['c'], of='target size'))
+
+    pr_desc(1, 'metadata MRU target size (GiB) =',
+            s_float(kstats['pm'], scale=BYTES_PER_GIB),
+            s_pct(kstats['pm'], scale=kstats['c'], of='target size'))
+
+#TODO not entirely sure about this
+    mfu_target_size = float(kstats['c']) - float(kstats['pd']) - float(kstats['pm']) - float(kstats['meta'])
     pr_desc(1, 'MFU target size (GiB) =',
             s_float(mfu_target_size, scale=BYTES_PER_GIB),
             s_pct(mfu_target_size, scale=kstats['c'], of='target size'))
